@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remio — Entrar na plataforma</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body data-pagina="login">
+
+  <div id="cabecalho"></div>
+
+  <main class="pagina-login">
+    <div class="cartao-login">
+      <h1>Bem-vindo à Remio</h1>
+      <p>Escolha como você quer usar a plataforma</p>
+
+      <div class="opcoes-papel">
+        <div class="opcao-papel selecionada" data-papel="cliente">
+          <i data-lucide="user"></i>
+          <strong>Cliente</strong>
+          <small>Quero contratar serviços</small>
+        </div>
+        <div class="opcao-papel" data-papel="prestador">
+          <i data-lucide="briefcase"></i>
+          <strong>Prestador</strong>
+          <small>Quero oferecer serviços</small>
+        </div>
+        <div class="opcao-papel" data-papel="parceiro">
+          <i data-lucide="store"></i>
+          <strong>Empresa Parceira</strong>
+          <small>Tenho uma loja/fornecedora</small>
+        </div>
+      </div>
+
+      <div class="campo-grupo" style="text-align:left">
+        <label>Seu nome</label>
+        <input type="text" id="campo-nome" placeholder="Como devemos te chamar?">
+      </div>
+
+      <button class="btn btn-primario" style="width:100%" id="botao-entrar">
+        <i data-lucide="log-in"></i> Entrar na plataforma
+      </button>
+
+      <p style="font-size:.78rem; color:var(--texto-suave); margin-top:18px">
+        Protótipo acadêmico — o login é simulado e nenhum dado é enviado a servidores.
+        No sistema real, esta etapa teria autenticação segura e verificação de identidade.
+      </p>
+    </div>
+  </main>
+
+  <footer id="rodape"></footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

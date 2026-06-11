@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remio — Empresas parceiras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body data-pagina="parceiros">
+
+  <div id="cabecalho"></div>
+
+  <main class="container" style="padding-top:36px; padding-bottom:60px; min-height:70vh">
+    <div class="secao-cabecalho" style="margin-bottom:18px">
+      <div>
+        <h2 style="font-size:1.8rem">Parceiros</h2>
+        <p style="margin-top:4px">Encontre lojas e fornecedores para os materiais do seu projeto</p>
+      </div>
+    </div>
+
+    <div class="painel-filtros">
+      <div class="campo-busca">
+        <i data-lucide="search"></i>
+        <input type="text" id="busca-parceiro" placeholder="Buscar parceiros por nome, segmento ou cidade...">
+      </div>
+      <div class="linha-filtros">
+        <div class="chips" style="margin-top:0" id="filtro-segmentos"></div>
+      </div>
+    </div>
+
+    <p class="contador-resultados" style="margin-bottom:16px" id="contador-verificados"></p>
+
+    <div class="grade-parceiros" id="lista-parceiros"></div>
+  </main>
+
+  <footer id="rodape"></footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

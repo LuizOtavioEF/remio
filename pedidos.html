@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remio — Meus pedidos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body data-pagina="pedidos">
+
+  <div id="cabecalho"></div>
+
+  <main class="container" style="padding-top:36px; padding-bottom:60px; min-height:70vh">
+    <div class="secao-cabecalho" style="margin-bottom:22px">
+      <div>
+        <h2 style="font-size:1.8rem">Meus pedidos</h2>
+        <p style="margin-top:4px"><span id="total-pedidos"></span> · acompanhe orçamentos, pagamentos e avaliações</p>
+      </div>
+      <div style="display:flex; gap:10px">
+        <button class="btn btn-claro btn-pequeno" id="redefinir-demo" title="Restaura os pedidos de exemplo">
+          <i data-lucide="rotate-ccw"></i> Redefinir demonstração
+        </button>
+        <a href="busca.html" class="btn btn-primario btn-pequeno"><i data-lucide="plus"></i> Novo pedido</a>
+      </div>
+    </div>
+
+    <div id="lista-pedidos"></div>
+  </main>
+
+  <!-- MODAL: Pagamento Protegido -->
+  <div class="modal-fundo" id="modal-pagamento">
+    <div class="modal">
+      <button class="modal-fechar"><i data-lucide="x"></i></button>
+      <h2>Pagamento Protegido</h2>
+      <p class="sub-modal">Seu dinheiro fica seguro com a Remio até o serviço ser concluído</p>
+
+      <div class="aviso-protegido">
+        <i data-lucide="shield-check"></i>
+        <span>O valor fica <strong>retido pela plataforma</strong> e só é liberado ao profissional quando você confirmar a conclusão do serviço. Em caso de problema, devolvemos 100% do valor.</span>
+      </div>
+
+      <div class="resumo-pagamento" id="resumo-pagamento"></div>
+
+      <div class="campo-grupo">
+        <label>Forma de pagamento</label>
+        <select id="forma-pagamento">
+          <option>Pix</option>
+          <option>Cartão de crédito</option>
+          <option>Cartão de débito</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primario" style="width:100%" id="confirmar-pagamento">
+        <i data-lucide="lock"></i> Confirmar pagamento protegido
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Avaliação do serviço -->
+  <div class="modal-fundo" id="modal-avaliacao">
+    <div class="modal">
+      <button class="modal-fechar"><i data-lucide="x"></i></button>
+      <h2>Como foi o serviço?</h2>
+      <p class="sub-modal">Sua avaliação confirma a conclusão e libera o pagamento ao profissional</p>
+
+      <div class="estrelas-clicaveis" id="estrelas-avaliacao">
+        <button data-nota="1"><i data-lucide="star"></i></button>
+        <button data-nota="2"><i data-lucide="star"></i></button>
+        <button data-nota="3"><i data-lucide="star"></i></button>
+        <button data-nota="4"><i data-lucide="star"></i></button>
+        <button data-nota="5"><i data-lucide="star"></i></button>
+      </div>
+
+      <div class="campo-grupo">
+        <label>Comentário (opcional)</label>
+        <textarea id="avaliacao-comentario" placeholder="Conte como foi sua experiência..."></textarea>
+      </div>
+
+      <button class="btn btn-verde" style="width:100%" id="enviar-avaliacao">
+        <i data-lucide="check-circle"></i> Enviar avaliação e liberar pagamento
+      </button>
+    </div>
+  </div>
+
+  <footer id="rodape"></footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

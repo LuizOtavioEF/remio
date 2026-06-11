@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remio — Perfil do profissional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body data-pagina="perfil">
+
+  <div id="cabecalho"></div>
+
+  <main class="container" id="perfil-conteudo" style="min-height:70vh"></main>
+
+  <!-- MODAL: solicitação de orçamento em etapas -->
+  <div class="modal-fundo" id="modal-orcamento">
+    <div class="modal">
+      <button class="modal-fechar"><i data-lucide="x"></i></button>
+      <h2>Solicitar orçamento</h2>
+      <p class="sub-modal">Leva menos de 1 minuto — o profissional responde com o valor</p>
+
+      <div class="indicador-etapas">
+        <div class="etapa-ponto ativa"></div>
+        <div class="etapa-ponto"></div>
+        <div class="etapa-ponto"></div>
+        <div class="etapa-ponto"></div>
+      </div>
+
+      <!-- Etapa 1: serviço -->
+      <div class="conteudo-etapa">
+        <div class="campo-grupo">
+          <label>Qual serviço você precisa?</label>
+          <select id="orcamento-servico"></select>
+        </div>
+        <div class="campo-grupo">
+          <label>Dê um título ao pedido (opcional)</label>
+          <input type="text" id="orcamento-titulo" placeholder="Ex.: Faxina completa no apartamento">
+        </div>
+      </div>
+
+      <!-- Etapa 2: data e local -->
+      <div class="conteudo-etapa" style="display:none">
+        <div class="campo-grupo">
+          <label>Data desejada</label>
+          <input type="date" id="orcamento-data">
+        </div>
+        <div class="campo-grupo">
+          <label>Endereço do serviço</label>
+          <input type="text" id="orcamento-endereco" placeholder="Rua, número e bairro">
+        </div>
+      </div>
+
+      <!-- Etapa 3: descrição -->
+      <div class="conteudo-etapa" style="display:none">
+        <div class="campo-grupo">
+          <label>Descreva o que precisa ser feito</label>
+          <textarea id="orcamento-descricao" placeholder="Quanto mais detalhes, mais preciso será o orçamento..."></textarea>
+        </div>
+      </div>
+
+      <!-- Etapa 4: resumo -->
+      <div class="conteudo-etapa" style="display:none">
+        <div class="aviso-protegido">
+          <i data-lucide="shield-check"></i>
+          <span><strong>Pagamento Protegido Remio:</strong> você só paga depois de aceitar o orçamento, e o valor fica retido até a conclusão do serviço.</span>
+        </div>
+        <div class="resumo-pagamento" id="resumo-orcamento"></div>
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:space-between; margin-top:8px">
+        <button class="btn btn-claro" id="orcamento-voltar">Voltar</button>
+        <button class="btn btn-primario" id="orcamento-avancar">Avançar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer id="rodape"></footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remio — Encontre o profissional ideal para sua casa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body data-pagina="home">
+
+  <div id="cabecalho"></div>
+
+  <main>
+    <!-- HERO: busca principal -->
+    <section class="hero">
+      <div class="container">
+        <h1>Encontre o profissional <em>ideal</em> para sua casa</h1>
+        <p class="sub">Contrate os melhores profissionais de serviços domésticos perto de você, com avaliações reais e pagamento protegido.</p>
+
+        <div class="busca-hero">
+          <i data-lucide="search"></i>
+          <input type="text" id="busca-hero-campo" placeholder="O que você precisa? Ex.: Faxina, Eletricista, Encanador...">
+          <button class="btn btn-primario" id="busca-hero-botao">Buscar</button>
+        </div>
+
+        <div class="chips">
+          <a class="chip" href="busca.html?cat=faxina">Faxina</a>
+          <a class="chip" href="busca.html?cat=eletrica">Eletricista</a>
+          <a class="chip" href="busca.html?cat=hidraulica">Encanador</a>
+          <a class="chip" href="busca.html?cat=pintura">Pintor</a>
+          <a class="chip" href="busca.html?cat=pedreiro">Pedreiro</a>
+          <a class="chip" href="busca.html?cat=jardinagem">Jardineiro</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- BANNER: publicar pedido -->
+    <section class="container">
+      <a href="busca.html" class="banner-cta">
+        <span class="icone-banner"><i data-lucide="megaphone"></i></span>
+        <div>
+          <strong>Publique seu pedido gratuitamente</strong>
+          <p>Descreva o que precisa e receba orçamentos de profissionais verificados</p>
+        </div>
+        <i data-lucide="arrow-right" class="seta"></i>
+      </a>
+    </section>
+
+    <!-- CATEGORIAS DE SERVIÇOS -->
+    <section class="secao">
+      <div class="container">
+        <div class="secao-cabecalho">
+          <h2>Serviços</h2>
+          <a href="busca.html">Ver todos →</a>
+        </div>
+        <div class="grade-categorias" id="grade-categorias"></div>
+      </div>
+    </section>
+
+    <!-- PROFISSIONAIS EM DESTAQUE -->
+    <section class="secao">
+      <div class="container">
+        <div class="secao-cabecalho">
+          <h2>Profissionais em destaque</h2>
+          <a href="busca.html">Ver todos →</a>
+        </div>
+        <div class="lista-profissionais" id="destaques"></div>
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="secao">
+      <div class="container">
+        <div class="secao-cabecalho">
+          <h2>Como funciona</h2>
+        </div>
+        <div class="passos-grid">
+          <div class="passo">
+            <div class="numero">1</div>
+            <h3>Descreva o que precisa</h3>
+            <p>Busque pelo serviço, compare profissionais por avaliação e faixa de preço ($ a $$$) e solicite um orçamento sem compromisso.</p>
+          </div>
+          <div class="passo">
+            <div class="numero">2</div>
+            <h3>Pague com proteção</h3>
+            <p>O valor fica retido pela Remio e só é liberado ao profissional quando você confirma que o serviço foi concluído. Deu problema? Reembolso garantido.</p>
+          </div>
+          <div class="passo">
+            <div class="numero">3</div>
+            <h3>Avalie e acompanhe</h3>
+            <p>Avalie o profissional ao final e acompanhe seus gastos e contratações no seu painel de indicadores exclusivo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA PARA PRESTADORES -->
+    <section class="secao">
+      <div class="container">
+        <a href="login.html" class="banner-cta">
+          <span class="icone-banner"><i data-lucide="briefcase"></i></span>
+          <div>
+            <strong>É profissional? Cadastre-se na Remio</strong>
+            <p>Receba pedidos na sua região e acompanhe seu desempenho com indicadores de BI</p>
+          </div>
+          <i data-lucide="arrow-right" class="seta"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer id="rodape"></footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

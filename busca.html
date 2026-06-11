@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remio — Buscar profissionais</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body data-pagina="busca">
+
+  <div id="cabecalho"></div>
+
+  <main class="container" style="padding-top:36px; padding-bottom:60px; min-height:70vh">
+    <div class="secao-cabecalho" style="margin-bottom:18px">
+      <div>
+        <h2 style="font-size:1.8rem">Profissionais disponíveis</h2>
+        <p style="margin-top:4px">Compare por avaliação, cidade e faixa de preço antes de contratar</p>
+      </div>
+      <span class="contador-resultados" id="contador-resultados"></span>
+    </div>
+
+    <!-- PAINEL DE FILTROS -->
+    <div class="painel-filtros">
+      <div class="campo-busca">
+        <i data-lucide="search"></i>
+        <input type="text" id="busca-texto" placeholder="Buscar por nome ou serviço...">
+      </div>
+
+      <div class="linha-filtros">
+        <div class="chips" style="margin-top:0" id="filtro-categorias"></div>
+      </div>
+
+      <div class="linha-filtros">
+        <select class="filtro" id="filtro-cidade"></select>
+
+        <select class="filtro" id="filtro-nota">
+          <option value="0">Qualquer nota</option>
+          <option value="4.5">Nota 4.5 ou mais</option>
+          <option value="4.8">Nota 4.8 ou mais</option>
+        </select>
+
+        <label>Faixa de preço:</label>
+        <div class="chips" style="margin-top:0" id="filtro-preco">
+          <button class="chip" data-preco="1" title="Mais em conta">$</button>
+          <button class="chip" data-preco="2" title="Intermediário">$$</button>
+          <button class="chip" data-preco="3" title="Premium">$$$</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="lista-profissionais" id="lista-profissionais"></div>
+  </main>
+
+  <footer id="rodape"></footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
