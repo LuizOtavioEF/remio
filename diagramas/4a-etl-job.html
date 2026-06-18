@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; background: #ffffff; font-family: Arial, sans-serif; }
+  #wrap { display: inline-block; padding: 40px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'15px','primaryColor':'#fff7ed','primaryBorderColor':'#ea580c','primaryTextColor':'#1f2937','lineColor':'#ea580c'}}}%%
+flowchart LR
+    START(["▶ Início"]) --> T1["tr_dim_tempo"]
+    T1 --> T2["tr_dim_cliente<br/><span style='font-size:11px'>SCD2</span>"]
+    T2 --> T3["tr_dim_prestador<br/><span style='font-size:11px'>SCD2</span>"]
+    T3 --> T4["tr_dim_servico"]
+    T4 --> T5["tr_dim_parceiro"]
+    T5 --> T6["tr_fato_servico"]
+    T6 --> T7["tr_fato_avaliacao"]
+    T7 --> T8["tr_fato_indicacao"]
+    T8 --> OK(["✓ Sucesso"])
+
+    classDef dim fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#1f2937;
+    classDef fato fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#1f2937;
+    classDef term fill:#1f2937,stroke:#1f2937,color:#ffffff;
+    class T1,T2,T3,T4,T5 dim;
+    class T6,T7,T8 fato;
+    class START,OK term;
+</pre>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>

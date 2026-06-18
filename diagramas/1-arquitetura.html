@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; background: #ffffff; font-family: Arial, sans-serif; }
+  #wrap { display: inline-block; padding: 40px; }
+  .mermaid { font-family: Arial, sans-serif; }
+</style>
+</head>
+<body>
+<div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'16px','primaryColor':'#fff7ed','primaryBorderColor':'#ea580c','primaryTextColor':'#1f2937','lineColor':'#ea580c'}}}%%
+flowchart LR
+    APP["🖥️ Aplicação Remio<br/><span style='font-size:12px'>site / app — operação do dia a dia</span>"]
+    OLTP[("🗄️ PostgreSQL — OLTP<br/><span style='font-size:12px'>banco transacional<br/>(pedidos, pagamentos, avaliações)</span>")]
+    ETL["⚙️ Pentaho PDI — ETL<br/><span style='font-size:12px'>extração, transformação<br/>e carga (jobs e transformations)</span>"]
+    DW[("📊 PostgreSQL — Data Warehouse<br/><span style='font-size:12px'>modelo estrela<br/>(dimensões + fatos)</span>")]
+    BI["📈 Dashboards de BI<br/><span style='font-size:12px'>cliente · prestador · parceiro</span>"]
+
+    APP -->|grava transações| OLTP
+    OLTP -->|extrai dados| ETL
+    ETL -->|carga dimensional| DW
+    DW -->|consultas analíticas| BI
+
+    classDef fonte fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#1f2937;
+    classDef proc fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#1f2937;
+    classDef bi fill:#1f2937,stroke:#1f2937,stroke-width:2px,color:#ffffff;
+    class APP,OLTP fonte;
+    class ETL proc;
+    class DW fonte;
+    class BI bi;
+</pre>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>

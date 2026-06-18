@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; background: #ffffff; font-family: Arial, sans-serif; }
+  #wrap { display: inline-block; padding: 40px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'15px','primaryColor':'#fff7ed','primaryBorderColor':'#ea580c','primaryTextColor':'#1f2937','lineColor':'#9ca3af'}}}%%
+erDiagram
+    DIM_TEMPO     ||--o{ FATO_SERVICO : quando
+    DIM_CLIENTE   ||--o{ FATO_SERVICO : quem_contratou
+    DIM_PRESTADOR ||--o{ FATO_SERVICO : quem_executou
+    DIM_SERVICO   ||--o{ FATO_SERVICO : qual_servico
+
+    DIM_TEMPO     ||--o{ FATO_AVALIACAO : quando
+    DIM_PRESTADOR ||--o{ FATO_AVALIACAO : avaliado
+    DIM_CLIENTE   ||--o{ FATO_AVALIACAO : avaliou
+    DIM_SERVICO   ||--o{ FATO_AVALIACAO : do_servico
+
+    DIM_TEMPO     ||--o{ FATO_INDICACAO_PARCEIRO : quando
+    DIM_PARCEIRO  ||--o{ FATO_INDICACAO_PARCEIRO : da_loja
+
+    DIM_TEMPO {
+        int sk_tempo PK "AAAAMMDD"
+        date data
+        smallint mes
+        smallint ano
+        varchar nome_dia_semana
+    }
+    DIM_CLIENTE {
+        bigint sk_cliente PK
+        bigint id_cliente "natural"
+        varchar nome
+        varchar cidade
+        boolean corrente "SCD2"
+    }
+    DIM_PRESTADOR {
+        bigint sk_prestador PK
+        bigint id_prestador "natural"
+        varchar plano
+        boolean verificado
+        smallint faixa_preco
+        boolean corrente "SCD2"
+    }
+    DIM_SERVICO {
+        int sk_servico PK
+        int id_categoria "natural"
+        varchar nome_categoria
+    }
+    DIM_PARCEIRO {
+        bigint sk_parceiro PK
+        bigint id_parceiro "natural"
+        varchar razao_social
+        varchar segmento
+    }
+    FATO_SERVICO {
+        bigint sk_fato_servico PK
+        int sk_tempo FK
+        bigint sk_cliente FK
+        bigint sk_prestador FK
+        int sk_servico FK
+        numeric valor_servico
+        numeric valor_comissao
+        numeric valor_prestador
+        smallint nota_avaliacao
+    }
+    FATO_AVALIACAO {
+        bigint sk_fato_avaliacao PK
+        int sk_tempo FK
+        bigint sk_prestador FK
+        bigint sk_cliente FK
+        int sk_servico FK
+        smallint nota
+    }
+    FATO_INDICACAO_PARCEIRO {
+        bigint sk_fato_indicacao PK
+        int sk_tempo FK
+        bigint sk_parceiro FK
+        int qtd_indicacao
+        int qtd_contato
+        int qtd_venda
+        numeric valor_venda
+    }
+</pre>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>

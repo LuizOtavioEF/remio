@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; background: #ffffff; font-family: Arial, sans-serif; }
+  #wrap { display: inline-block; padding: 40px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'15px','primaryColor':'#fff7ed','primaryBorderColor':'#ea580c','primaryTextColor':'#1f2937','lineColor':'#9ca3af'}}}%%
+erDiagram
+    USUARIO ||--o| PRESTADOR : "é"
+    USUARIO ||--o| PARCEIRO : "é"
+    USUARIO ||--o{ ENDERECO : possui
+    USUARIO ||--o{ PEDIDO : "faz (cliente)"
+    PRESTADOR ||--o{ PRESTADOR_CATEGORIA : atende
+    CATEGORIA_SERVICO ||--o{ PRESTADOR_CATEGORIA : classifica
+    CATEGORIA_SERVICO ||--o{ PEDIDO : categoriza
+    PRESTADOR ||--o{ PEDIDO : executa
+    ENDERECO ||--o{ PEDIDO : "local do serviço"
+    PEDIDO ||--o{ ORCAMENTO : recebe
+    PRESTADOR ||--o{ ORCAMENTO : envia
+    PEDIDO ||--|| PAGAMENTO : gera
+    PEDIDO ||--|| AVALIACAO : gera
+    PRESTADOR ||--o{ AVALIACAO : recebe
+    PARCEIRO ||--o{ PARCEIRO_INDICACAO : gera
+
+    USUARIO {
+        bigint id PK
+        varchar nome
+        varchar email UK
+        varchar tipo "cliente/prestador/parceiro"
+        varchar cidade
+    }
+    PRESTADOR {
+        bigint id PK
+        bigint usuario_id FK
+        varchar plano "free/pro"
+        boolean verificado
+        smallint faixa_preco "1 a 3"
+        numeric nota_media
+    }
+    PARCEIRO {
+        bigint id PK
+        bigint usuario_id FK
+        varchar razao_social
+        varchar cnpj UK
+        varchar segmento
+    }
+    CATEGORIA_SERVICO {
+        int id PK
+        varchar nome
+        varchar slug UK
+    }
+    PRESTADOR_CATEGORIA {
+        bigint prestador_id PK_FK
+        int categoria_id PK_FK
+    }
+    ENDERECO {
+        bigint id PK
+        bigint usuario_id FK
+        varchar cidade
+        char uf
+    }
+    PEDIDO {
+        bigint id PK
+        bigint cliente_id FK
+        bigint prestador_id FK
+        int categoria_id FK
+        bigint endereco_id FK
+        varchar status
+        timestamp data_criacao
+    }
+    ORCAMENTO {
+        bigint id PK
+        bigint pedido_id FK
+        bigint prestador_id FK
+        numeric valor
+        varchar status
+    }
+    PAGAMENTO {
+        bigint id PK
+        bigint pedido_id FK
+        numeric valor_total
+        numeric valor_comissao "15%"
+        numeric valor_prestador
+        varchar status "retido/liberado"
+    }
+    AVALIACAO {
+        bigint id PK
+        bigint pedido_id FK
+        bigint prestador_id FK
+        smallint nota "1 a 5"
+        text comentario
+    }
+    PARCEIRO_INDICACAO {
+        bigint id PK
+        bigint parceiro_id FK
+        boolean gerou_contato
+        boolean gerou_venda
+        numeric valor_venda
+    }
+</pre>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>

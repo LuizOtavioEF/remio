@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; background: #ffffff; font-family: Arial, sans-serif; }
+  #wrap { display: inline-block; padding: 40px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'14px','primaryColor':'#fef3c7','primaryBorderColor':'#f59e0b','primaryTextColor':'#1f2937','lineColor':'#ea580c'}}}%%
+flowchart LR
+    TI["Table Input<br/><span style='font-size:11px'>SELECT do OLTP<br/>pedido + pagamento<br/>+ avaliacao</span>"]
+    L1["Lookup<br/>dim_tempo<br/><span style='font-size:11px'>→ sk_tempo</span>"]
+    L2["Lookup<br/>dim_cliente<br/><span style='font-size:11px'>→ sk_cliente</span>"]
+    L3["Lookup<br/>dim_prestador<br/><span style='font-size:11px'>→ sk_prestador</span>"]
+    L4["Lookup<br/>dim_servico<br/><span style='font-size:11px'>→ sk_servico</span>"]
+    SV["Select Values<br/><span style='font-size:11px'>métricas + chaves</span>"]
+    TO["Table Output<br/><span style='font-size:11px'>INSERT em<br/>fato_servico</span>"]
+    TI --> L1 --> L2 --> L3 --> L4 --> SV --> TO
+
+    classDef io fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1f2937;
+    classDef lk fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#1f2937;
+    classDef out fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#1f2937;
+    class TI io;
+    class L1,L2,L3,L4,SV lk;
+    class TO out;
+</pre>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>
