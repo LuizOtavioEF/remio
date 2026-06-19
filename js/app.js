@@ -38,6 +38,22 @@ function toast(mensagem) {
   el._timer = setTimeout(() => el.classList.remove('visivel'), 3200);
 }
 
+/* ---------- Repositório de erros (observabilidade) ----------
+   Captura erros de JavaScript em todo o site e os guarda no
+   navegador, alimentando a tela de Monitoramento. É a versão
+   didática do "repositório de erros" descrito na arquitetura. */
+function registrarErro(mensagem, origem) {
+  const erros = JSON.parse(localStorage.getItem('remio_erros') || '[]');
+  erros.unshift({
+    mensagem: String(mensagem).slice(0, 200),
+    origem: origem || (location.pathname.split('/').pop() || 'index.html'),
+    data: new Date().toLocaleString('pt-BR')
+  });
+  localStorage.setItem('remio_erros', JSON.stringify(erros.slice(0, 50))); // mantém os 50 mais recentes
+}
+window.addEventListener('error', e => registrarErro(e.message, e.filename ? e.filename.split('/').pop() : null));
+window.addEventListener('unhandledrejection', e => registrarErro('Promise rejeitada: ' + (e.reason?.message || e.reason), null));
+
 /* ---------- Sessão do usuário (papel + nome) ---------- */
 const PAPEIS = {
   cliente:   { rotulo: 'Cliente',          icone: 'user' },
@@ -88,7 +104,8 @@ function renderCabecalho() {
     { id: 'parceiros',  href: 'parceiros.html', rotulo: 'Parceiros',    icone: 'store' },
     { id: 'pedidos',    href: 'pedidos.html',   rotulo: 'Pedidos',      icone: 'file-text' },
     { id: 'dashboard',  href: 'dashboard.html', rotulo: 'Painel BI',    icone: 'bar-chart-3' },
-    { id: 'insights',   href: 'insights.html',  rotulo: 'Insights IA',  icone: 'sparkles' }
+    { id: 'insights',   href: 'insights.html',  rotulo: 'Insights IA',  icone: 'sparkles' },
+    { id: 'monitoramento', href: 'monitoramento.html', rotulo: 'Monitoramento', icone: 'activity' }
   ];
 
   const nav = links.map(l =>
@@ -778,6 +795,95 @@ function initInsights() {
 }
 
 /* ============================================================
+   PÁGINA: MONITORAMENTO (observabilidade + repositório de erros)
+   ------------------------------------------------------------
+   Materializa, com dados simulados, os conceitos do documento
+   de Arquitetura: saúde do sistema, health checks, qualidade
+   de dados (ETL) e o repositório de erros (estes reais).
+   ============================================================ */
+function initMonitoramento() {
+  const horas = Array.from({ length: 12 }, (_, i) => `${String((i * 2)).padStart(2, '0')}h`);
+  const latencia = [165, 158, 150, 172, 180, 240, 210, 195, 205, 230, 188, 175];
+  const requisicoes = [320, 210, 140, 180, 520, 880, 1020, 940, 870, 1100, 760, 540];
+
+  // KPIs de saúde do sistema
+  $('#mon-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-icone">${icone('activity')}</div><strong>99,95<span style="font-size:1rem">%</span></strong><small>Disponibilidade (30 dias)</small></div>
+    <div class="kpi"><div class="kpi-icone">${icone('timer')}</div><strong>185<span style="font-size:1rem">ms</span></strong><small>Latência média</small></div>
+    <div class="kpi"><div class="kpi-icone">${icone('alert-triangle')}</div><strong>0,3<span style="font-size:1rem">%</span></strong><small>Taxa de erro</small></div>
+    <div class="kpi"><div class="kpi-icone">${icone('gauge')}</div><strong>1,1<span style="font-size:1rem">k/min</span></strong><small>Requisições</small></div>`;
+
+  // Health checks dos serviços
+  const servicos = [
+    { nome: 'API Gateway', status: 'ok' }, { nome: 'Serviço de Pedidos', status: 'ok' },
+    { nome: 'Serviço de Pagamentos', status: 'ok' }, { nome: 'Banco OLTP (PostgreSQL)', status: 'ok' },
+    { nome: 'Data Warehouse', status: 'ok' }, { nome: 'Backend de IA (Claude)', status: 'degradado' }
+  ];
+  $('#mon-servicos').innerHTML = servicos.map(s => `
+    <li>${icone(s.status === 'ok' ? 'check-circle' : 'alert-circle')}
+      <span style="flex:1">${s.nome}</span>
+      <span style="font-weight:700;color:${s.status === 'ok' ? 'var(--verde)' : 'var(--ambar)'}">
+        ${s.status === 'ok' ? 'Operacional' : 'Degradado'}</span></li>`).join('');
+
+  // Qualidade de dados (última carga do ETL) — resolve "painéis errados"
+  const checks = [
+    { nome: 'Completude (sem campos obrigatórios nulos)', ok: true },
+    { nome: 'Integridade referencial (sem chaves órfãs)', ok: true },
+    { nome: 'Consistência (comissão + prestador = total)', ok: true },
+    { nome: 'Volume da carga dentro do esperado', ok: true }
+  ];
+  $('#mon-qualidade').innerHTML = checks.map(c => `
+    <li>${icone(c.ok ? 'check-circle' : 'x-circle')}
+      <span style="flex:1">${c.nome}</span>
+      <span style="font-weight:700;color:var(--verde)">${c.ok ? 'OK' : 'Falhou'}</span></li>`).join('');
+
+  // Gráficos (Chart.js)
+  if (window.Chart) {
+    Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+    new Chart($('#mon-latencia'), {
+      type: 'line',
+      data: { labels: horas, datasets: [{ label: 'Latência (ms)', data: latencia,
+        borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,.15)', fill: true, tension: .4, pointRadius: 3 }] },
+      options: { plugins: { legend: { display: false } } }
+    });
+    new Chart($('#mon-requisicoes'), {
+      type: 'bar',
+      data: { labels: horas, datasets: [{ label: 'Requisições', data: requisicoes, backgroundColor: '#1f2937', borderRadius: 6 }] },
+      options: { plugins: { legend: { display: false } } }
+    });
+  }
+
+  // Repositório de erros (reais, capturados em todo o site)
+  function renderErros() {
+    const erros = JSON.parse(localStorage.getItem('remio_erros') || '[]');
+    if (!erros.length) {
+      $('#mon-erros').innerHTML = `<div class="vazio" style="padding:30px">${icone('shield-check')}
+        <strong>Nenhum erro registrado</strong>Os erros de JavaScript do site aparecem aqui automaticamente.</div>`;
+    } else {
+      $('#mon-erros').innerHTML = `
+        <table style="width:100%; border-collapse:collapse; font-size:.85rem">
+          <thead><tr style="text-align:left; color:var(--texto-suave)">
+            <th style="padding:8px">Quando</th><th style="padding:8px">Página</th><th style="padding:8px">Mensagem</th></tr></thead>
+          <tbody>${erros.map(e => `<tr style="border-top:1px solid var(--borda)">
+            <td style="padding:8px; white-space:nowrap">${e.data}</td>
+            <td style="padding:8px"><code>${e.origem}</code></td>
+            <td style="padding:8px; color:var(--vermelho)">${e.mensagem}</td></tr>`).join('')}</tbody>
+        </table>`;
+    }
+    renderIcones();
+  }
+  $('#mon-gerar-erro').addEventListener('click', () => {
+    try { null.metodoInexistente(); } catch (err) { registrarErro(err.message, 'monitoramento.html'); }
+    toast('Erro de teste capturado pelo repositório.');
+    renderErros();
+  });
+  $('#mon-limpar-erros').addEventListener('click', () => {
+    localStorage.removeItem('remio_erros'); toast('Repositório de erros limpo.'); renderErros();
+  });
+  renderErros();
+}
+
+/* ============================================================
    INICIALIZAÇÃO — identifica a página e monta os componentes
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -800,6 +906,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (pagina === 'parceiros') initParceiros();
   if (pagina === 'login') initLogin();
   if (pagina === 'insights') initInsights();
+  if (pagina === 'monitoramento') initMonitoramento();
   // A página "dashboard" é inicializada pelo dashboard.js
 
   renderIcones();

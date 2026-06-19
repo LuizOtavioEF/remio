@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remio — Monitoramento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body data-pagina="monitoramento">
+
+  <div id="cabecalho"></div>
+
+  <main class="container" style="padding-top:36px; padding-bottom:60px; min-height:70vh">
+    <div class="dash-cabecalho">
+      <span class="papel-tag"><i data-lucide="activity"></i> Observabilidade</span>
+      <h1>Monitoramento da plataforma</h1>
+      <p>Saúde do sistema, verificação de qualidade de dados e repositório de erros — em tempo real (dados simulados).</p>
+    </div>
+
+    <div class="grade-kpis" id="mon-kpis" style="margin:26px 0"></div>
+
+    <div class="grade-graficos">
+      <div class="grafico-card">
+        <h3><i data-lucide="timer"></i> Latência nas últimas 24h (ms)</h3>
+        <canvas id="mon-latencia"></canvas>
+      </div>
+      <div class="grafico-card">
+        <h3><i data-lucide="bar-chart-3"></i> Requisições por horário</h3>
+        <canvas id="mon-requisicoes"></canvas>
+      </div>
+
+      <div class="grafico-card">
+        <h3><i data-lucide="server"></i> Saúde dos serviços (health checks)</h3>
+        <ul class="lista-qualificacoes" id="mon-servicos"></ul>
+      </div>
+      <div class="grafico-card">
+        <h3><i data-lucide="database"></i> Qualidade de dados (última carga ETL)</h3>
+        <ul class="lista-qualificacoes" id="mon-qualidade"></ul>
+      </div>
+
+      <div class="grafico-card largo">
+        <h3><i data-lucide="bug"></i> Repositório de erros</h3>
+        <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap">
+          <button class="btn btn-claro btn-pequeno" id="mon-gerar-erro"><i data-lucide="zap"></i> Gerar erro de teste</button>
+          <button class="btn btn-claro btn-pequeno" id="mon-limpar-erros"><i data-lucide="trash-2"></i> Limpar</button>
+        </div>
+        <div id="mon-erros"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="rodape"></footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
