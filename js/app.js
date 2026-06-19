@@ -87,7 +87,8 @@ function renderCabecalho() {
     { id: 'busca',      href: 'busca.html',     rotulo: 'Profissionais',icone: 'search' },
     { id: 'parceiros',  href: 'parceiros.html', rotulo: 'Parceiros',    icone: 'store' },
     { id: 'pedidos',    href: 'pedidos.html',   rotulo: 'Pedidos',      icone: 'file-text' },
-    { id: 'dashboard',  href: 'dashboard.html', rotulo: 'Painel BI',    icone: 'bar-chart-3' }
+    { id: 'dashboard',  href: 'dashboard.html', rotulo: 'Painel BI',    icone: 'bar-chart-3' },
+    { id: 'insights',   href: 'insights.html',  rotulo: 'Insights IA',  icone: 'sparkles' }
   ];
 
   const nav = links.map(l =>
@@ -655,6 +656,128 @@ function initLogin() {
 }
 
 /* ============================================================
+   PÁGINA: INSIGHTS DE IA (análise de avaliações com a Claude)
+   ------------------------------------------------------------
+   Conversa com o backend (remio/backend), que chama a API da
+   Claude com a chave guardada com segurança no servidor.
+   ============================================================ */
+const BACKEND_PADRAO = 'http://localhost:3000';
+function urlBackend() { return localStorage.getItem('remio_backend') || BACKEND_PADRAO; }
+
+function initInsights() {
+  // Chips de categoria para escolher quais avaliações analisar
+  $('#filtro-insights').innerHTML =
+    `<button class="chip ativo" data-cat="">Todas</button>` +
+    CATEGORIAS.map(c => `<button class="chip" data-cat="${c.id}">${c.nome}</button>`).join('');
+
+  let categoria = '';
+  $('#filtro-insights').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    categoria = chip.dataset.cat;
+    $$('#filtro-insights .chip').forEach(c => c.classList.toggle('ativo', c === chip));
+  });
+
+  // Campo para configurar a URL do backend (padrão localhost:3000)
+  $('#backend-url').value = urlBackend();
+  $('#backend-url').addEventListener('change', e => {
+    localStorage.setItem('remio_backend', e.target.value.trim() || BACKEND_PADRAO);
+  });
+
+  // Reúne as avaliações dos profissionais (filtradas por categoria, se houver)
+  function coletarAvaliacoes() {
+    const profs = categoria ? PROFISSIONAIS.filter(p => p.categorias.includes(categoria)) : PROFISSIONAIS;
+    const avaliacoes = [];
+    profs.forEach(p => (p.avaliacoes || []).forEach(a => avaliacoes.push({ nota: a.nota, texto: a.texto })));
+    return avaliacoes;
+  }
+
+  $('#botao-analisar').addEventListener('click', async () => {
+    const avaliacoes = coletarAvaliacoes();
+    if (!avaliacoes.length) { toast('Nenhuma avaliação para analisar nesta categoria.'); return; }
+
+    const resultado = $('#resultado-insights');
+    resultado.innerHTML = `<div class="vazio" style="padding:50px">${icone('loader')}
+      <strong>Analisando ${avaliacoes.length} avaliações com a IA...</strong>
+      A Claude está lendo os comentários e identificando padrões.</div>`;
+    renderIcones();
+
+    try {
+      const resp = await fetch(`${urlBackend()}/api/analisar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avaliacoes, contexto: categoria ? nomeCategoria(categoria) : 'serviços domésticos' })
+      });
+      if (!resp.ok) {
+        const erro = await resp.json().catch(() => ({}));
+        throw new Error(erro.erro || `Erro ${resp.status}`);
+      }
+      const { analise, meta } = await resp.json();
+      renderAnalise(analise, meta);
+    } catch (err) {
+      const offline = err.message.includes('Failed to fetch') || err.message.includes('fetch');
+      resultado.innerHTML = `<div class="vazio" style="padding:50px">${icone('plug-zap')}
+        <strong>${offline ? 'Backend de IA não encontrado' : 'Não foi possível analisar'}</strong>
+        ${offline
+          ? 'Inicie o backend local (pasta <code>remio/backend</code>): <code>npm install</code> e <code>npm start</code>. Veja o README dessa pasta.'
+          : err.message}</div>`;
+      renderIcones();
+    }
+  });
+
+  function renderAnalise(a, meta) {
+    const cor = { positivo: 'var(--verde)', neutro: 'var(--ambar)', negativo: 'var(--vermelho)' }[a.sentimento_geral];
+    const lista = (titulo, itens, ic) => `
+      <div class="bloco">
+        <h3>${icone(ic)} ${titulo}</h3>
+        <ul class="lista-qualificacoes">
+          ${itens.map(t => `<li>${icone('dot')} ${t}</li>`).join('')}
+        </ul>
+      </div>`;
+
+    $('#resultado-insights').innerHTML = `
+      <div class="grade-kpis" style="margin-bottom:20px">
+        <div class="kpi"><div class="kpi-icone">${icone('smile')}</div>
+          <strong style="text-transform:capitalize;color:${cor}">${a.sentimento_geral}</strong>
+          <small>Sentimento geral</small></div>
+        <div class="kpi"><div class="kpi-icone">${icone('gauge')}</div>
+          <strong>${a.indice_satisfacao}<span style="font-size:1rem">/100</span></strong>
+          <small>Índice de satisfação</small></div>
+        <div class="kpi"><div class="kpi-icone">${icone('messages-square')}</div>
+          <strong>${meta.avaliacoes_analisadas}</strong>
+          <small>Avaliações analisadas</small></div>
+        <div class="kpi"><div class="kpi-icone">${icone('sparkles')}</div>
+          <strong style="font-size:1rem">${meta.modelo}</strong>
+          <small>Modelo de IA</small></div>
+      </div>
+
+      <div class="bloco" style="border-left:4px solid ${cor}">
+        <h3>${icone('file-text')} Resumo da IA</h3>
+        <p>${a.resumo}</p>
+      </div>
+
+      <div class="bloco">
+        <h3>${icone('tags')} Temas recorrentes</h3>
+        <div class="chips" style="margin-top:0">
+          ${a.temas.map(t => {
+            const c = { positivo: 'var(--verde-claro)', neutro: '#fef3c7', negativo: '#fee2e2' }[t.sentimento];
+            return `<span class="chip" style="cursor:default;background:${c}">${t.tema} · ${t.mencoes}×</span>`;
+          }).join('')}
+        </div>
+      </div>
+
+      ${lista('Pontos fortes', a.pontos_fortes, 'thumbs-up')}
+      ${lista('Pontos de melhoria', a.pontos_de_melhoria, 'wrench')}
+      ${lista('Sugestões para a plataforma', a.sugestoes, 'lightbulb')}
+
+      <p style="text-align:center;font-size:.8rem;color:var(--texto-suave);margin-top:10px">
+        Análise gerada por IA (API da Claude) · ${meta.tokens?.output_tokens ?? '–'} tokens de saída
+      </p>`;
+    renderIcones();
+  }
+}
+
+/* ============================================================
    INICIALIZAÇÃO — identifica a página e monta os componentes
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -676,6 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (pagina === 'pedidos') initPedidos();
   if (pagina === 'parceiros') initParceiros();
   if (pagina === 'login') initLogin();
+  if (pagina === 'insights') initInsights();
   // A página "dashboard" é inicializada pelo dashboard.js
 
   renderIcones();

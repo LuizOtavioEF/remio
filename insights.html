@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remio — Insights de IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body data-pagina="insights">
+
+  <div id="cabecalho"></div>
+
+  <main class="container" style="padding-top:36px; padding-bottom:60px; min-height:70vh">
+    <div class="secao-cabecalho" style="margin-bottom:18px">
+      <div>
+        <h2 style="font-size:1.8rem">Insights de IA</h2>
+        <p style="margin-top:4px">Análise automática das avaliações com a API da Claude — sentimento, temas e sugestões de melhoria</p>
+      </div>
+    </div>
+
+    <div class="painel-filtros">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+        <span class="selo-protegido"><i data-lucide="sparkles"></i> Inteligência Artificial</span>
+        <span style="font-size:.85rem; color:var(--texto-suave)">Escolha as avaliações a analisar e clique em "Analisar com IA".</span>
+      </div>
+
+      <div class="linha-filtros">
+        <div class="chips" style="margin-top:0" id="filtro-insights"></div>
+      </div>
+
+      <div class="linha-filtros" style="justify-content:space-between">
+        <button class="btn btn-primario" id="botao-analisar">
+          <i data-lucide="sparkles"></i> Analisar com IA
+        </button>
+        <label style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:.82rem; color:var(--texto-suave)">
+          <i data-lucide="server" style="width:15px;height:15px"></i> Backend:
+          <input type="text" id="backend-url" class="filtro" style="width:230px"
+                 placeholder="http://localhost:3000">
+        </label>
+      </div>
+    </div>
+
+    <div id="resultado-insights">
+      <div class="vazio" style="padding:60px 20px">
+        <i data-lucide="sparkles"></i>
+        <strong>Pronto para analisar</strong>
+        Selecione uma categoria (ou "Todas") e clique em <b>Analisar com IA</b>.
+        O backend local enviará as avaliações para a Claude e o resultado aparecerá aqui.
+      </div>
+    </div>
+  </main>
+
+  <footer id="rodape"></footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
