@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<style>body{margin:0;background:#fff;font-family:Arial,sans-serif}#wrap{display:inline-block;padding:40px}</style>
+</head><body><div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'14px','primaryColor':'#fff7ed','primaryBorderColor':'#ea580c','primaryTextColor':'#1f2937','lineColor':'#ea580c'}}}%%
+flowchart LR
+    AVAL["Avaliações<br/>dos clientes<br/><span style='font-size:11px'>texto livre</span>"]
+    BACK["Backend Remio<br/><span style='font-size:11px'>(guarda a chave da API<br/>com segurança)</span>"]
+    CLAUDE["API da Claude<br/><span style='font-size:11px'>(Anthropic)</span>"]
+    OUT["Resultado estruturado<br/><span style='font-size:11px'>sentimento + temas<br/>+ sugestões</span>"]
+    PAINEL["Painel de Insights<br/><span style='font-size:11px'>padrões de melhoria<br/>(observabilidade)</span>"]
+
+    AVAL --> BACK --> CLAUDE --> OUT --> PAINEL
+
+    classDef src fill:#dbeafe,stroke:#3b82f6,color:#1f2937;
+    classDef back fill:#fff7ed,stroke:#ea580c,color:#1f2937;
+    classDef ia fill:#f3e8ff,stroke:#8b5cf6,color:#1f2937;
+    classDef out fill:#d1fae5,stroke:#10b981,color:#1f2937;
+    class AVAL src;
+    class BACK back;
+    class CLAUDE ia;
+    class OUT,PAINEL out;
+</pre></div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true});</script>
+</body></html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<style>body{margin:0;background:#fff;font-family:Arial,sans-serif}#wrap{display:inline-block;padding:40px}</style>
+</head><body><div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'14px','primaryColor':'#fff7ed','primaryBorderColor':'#ea580c','primaryTextColor':'#1f2937','lineColor':'#ea580c','clusterBkg':'#fafafa','clusterBorder':'#d1d5db'}}}%%
+flowchart LR
+    APP["Aplicação Remio<br/>(serviços instrumentados)"]
+    subgraph PILARES["3 Pilares da Observabilidade"]
+        LOG["Logs<br/><span style='font-size:11px'>eventos e erros</span>"]
+        MET["Métricas<br/><span style='font-size:11px'>latência, throughput, uso</span>"]
+        TRC["Traces<br/><span style='font-size:11px'>caminho das requisições</span>"]
+    end
+    COL["Coletor<br/>OpenTelemetry"]
+    STO[("Armazenamento<br/>Prometheus / Loki")]
+    DASH["Dashboards<br/>Grafana"]
+    ALERT["Alertas<br/>(site lento, erros)"]
+    IA["Detecção de anomalias<br/>com IA<br/><span style='font-size:11px'>padrões e melhorias</span>"]
+
+    APP --> LOG & MET & TRC
+    LOG & MET & TRC --> COL --> STO
+    STO --> DASH & ALERT & IA
+
+    classDef app fill:#dbeafe,stroke:#3b82f6,color:#1f2937;
+    classDef pil fill:#fff7ed,stroke:#ea580c,color:#1f2937;
+    classDef inf fill:#d1fae5,stroke:#10b981,color:#1f2937;
+    classDef ia fill:#f3e8ff,stroke:#8b5cf6,color:#1f2937;
+    class APP app;
+    class LOG,MET,TRC pil;
+    class COL,STO,DASH,ALERT inf;
+    class IA ia;
+</pre></div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true});</script>
+</body></html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<style>body{margin:0;background:#fff;font-family:Arial,sans-serif}#wrap{display:inline-block;padding:40px}</style>
+</head><body><div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'14px','primaryColor':'#fff7ed','primaryBorderColor':'#ea580c','primaryTextColor':'#1f2937','lineColor':'#ea580c'}}}%%
+flowchart LR
+    SPEC["Especificação<br/><span style='font-size:11px'>DESIGN.md</span>"]
+    PLAN["Plano<br/><span style='font-size:11px'>tarefas</span>"]
+    CODE["Código<br/><span style='font-size:11px'>implementação</span>"]
+    TEST["Testes<br/><span style='font-size:11px'>automatizados</span>"]
+    BUILD["Build + CI<br/><span style='font-size:11px'>integração contínua</span>"]
+    DEPLOY["Deploy<br/><span style='font-size:11px'>entrega contínua</span>"]
+    MON["Monitoramento<br/><span style='font-size:11px'>observabilidade</span>"]
+
+    SPEC --> PLAN --> CODE --> TEST --> BUILD --> DEPLOY --> MON
+    MON -.feedback / melhoria.-> SPEC
+
+    classDef spec fill:#f3e8ff,stroke:#8b5cf6,color:#1f2937;
+    classDef dev fill:#fff7ed,stroke:#ea580c,color:#1f2937;
+    classDef ops fill:#d1fae5,stroke:#10b981,color:#1f2937;
+    class SPEC,PLAN spec;
+    class CODE,TEST,BUILD dev;
+    class DEPLOY,MON ops;
+</pre></div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true});</script>
+</body></html>

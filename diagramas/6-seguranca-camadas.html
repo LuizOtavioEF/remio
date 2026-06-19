@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<style>body{margin:0;background:#fff;font-family:Arial,sans-serif}#wrap{display:inline-block;padding:40px}</style>
+</head><body><div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'15px','primaryColor':'#fff7ed','primaryBorderColor':'#ea580c','primaryTextColor':'#1f2937','lineColor':'#ea580c'}}}%%
+flowchart TB
+    L1["<b>1 · Rede e Borda</b><br/><span style='font-size:12px'>TLS/HTTPS · WAF · Rate limiting / anti-DDoS</span>"]
+    L2["<b>2 · Aplicação</b><br/><span style='font-size:12px'>Autenticação (login + JWT) · Autorização por papel<br/>(cliente / prestador / parceiro / admin) · Validação de entrada</span>"]
+    L3["<b>3 · Dados</b><br/><span style='font-size:12px'>Queries parametrizadas (anti SQL injection)<br/>Criptografia em repouso e em trânsito · Menor privilégio</span>"]
+    L4["<b>4 · Monitoramento</b><br/><span style='font-size:12px'>Auditoria / trilha de logs · Alertas de segurança</span>"]
+    L1 --> L2 --> L3 --> L4
+
+    classDef rede fill:#dbeafe,stroke:#3b82f6,color:#1f2937;
+    classDef app fill:#fff7ed,stroke:#ea580c,color:#1f2937;
+    classDef dados fill:#d1fae5,stroke:#10b981,color:#1f2937;
+    classDef mon fill:#f3e8ff,stroke:#8b5cf6,color:#1f2937;
+    class L1 rede;
+    class L2 app;
+    class L3 dados;
+    class L4 mon;
+</pre></div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true});</script>
+</body></html>

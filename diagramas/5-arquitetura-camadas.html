@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<style>body{margin:0;background:#fff;font-family:Arial,sans-serif}#wrap{display:inline-block;padding:40px}</style>
+</head><body><div id="wrap">
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial','fontSize':'14px','primaryColor':'#fff7ed','primaryBorderColor':'#ea580c','primaryTextColor':'#1f2937','lineColor':'#ea580c','clusterBkg':'#fafafa','clusterBorder':'#d1d5db'}}}%%
+flowchart TB
+    subgraph CLI["CAMADA CLIENTE"]
+        WEB["Navegador / App<br/>(site Remio)"]
+    end
+    subgraph BORDA["CAMADA DE BORDA"]
+        CDN["CDN"]
+        WAF["WAF + Rate Limiting<br/>(proteção e filtragem)"]
+    end
+    subgraph APP["CAMADA DE APLICAÇÃO"]
+        GW["API Gateway<br/>(autenticação / roteamento)"]
+        S1["Serviço<br/>Usuários"]
+        S2["Serviço<br/>Pedidos"]
+        S3["Serviço<br/>Pagamentos"]
+        S4["Serviço<br/>Avaliações"]
+        S5["Serviço<br/>BI / IA"]
+    end
+    subgraph DADOS["CAMADA DE DADOS"]
+        OLTP[("PostgreSQL<br/>OLTP")]
+        DW[("Data<br/>Warehouse")]
+        CACHE[("Cache<br/>Redis")]
+    end
+    subgraph TRANSV["CAMADAS TRANSVERSAIS"]
+        OBS["Observabilidade<br/>(logs, métricas, traces)"]
+        SEG["Segurança<br/>(authN/authZ, criptografia)"]
+    end
+
+    WEB --> CDN --> WAF --> GW
+    GW --> S1 & S2 & S3 & S4 & S5
+    S1 & S2 & S3 & S4 --> OLTP
+    S5 --> DW
+    S2 --> CACHE
+    OLTP -.ETL.-> DW
+    APP -.instrumenta.-> OBS
+    APP -.protege.-> SEG
+
+    classDef cli fill:#dbeafe,stroke:#3b82f6,color:#1f2937;
+    classDef borda fill:#fef3c7,stroke:#f59e0b,color:#1f2937;
+    classDef app fill:#fff7ed,stroke:#ea580c,color:#1f2937;
+    classDef dados fill:#d1fae5,stroke:#10b981,color:#1f2937;
+    classDef transv fill:#f3e8ff,stroke:#8b5cf6,color:#1f2937;
+    class WEB cli;
+    class CDN,WAF borda;
+    class GW,S1,S2,S3,S4,S5 app;
+    class OLTP,DW,CACHE dados;
+    class OBS,SEG transv;
+</pre></div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true});</script>
+</body></html>
