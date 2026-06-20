@@ -17,7 +17,7 @@ const txt = (text, opts = {}) => new TextRun({ text, ...opts });
 function dims(file) {
   const b = fs.readFileSync(path.join(PRINTS, file));
   const w = b.readUInt32BE(16), h = b.readUInt32BE(20);
-  const escala = Math.min(624 / w, 760 / h);
+  const escala = Math.min(624 / w, 680 / h);
   return { data: b, width: Math.round(w * escala), height: Math.round(h * escala) };
 }
 
@@ -104,7 +104,11 @@ const figuras = [
   ...figura(8, '08-dashboard-prestador.png', 'Painel de BI — Prestador',
     'Dashboard do prestador, voltado à gestão do seu desempenho: faturamento mensal, serviços concluídos, nota média e taxa de conversão de orçamentos. Inclui o comparativo entre o preço do profissional e a média da categoria e um mapa de calor com os horários de pico da demanda.'),
   ...figura(9, '09-dashboard-parceiro.png', 'Painel de BI — Empresa Parceira',
-    'Dashboard da empresa parceira, com os resultados da loja dentro do ecossistema Remio: indicações recebidas, contatos gerados, taxa de conversão e avaliação, além do funil que acompanha a jornada da indicação até a venda estimada.')
+    'Dashboard da empresa parceira, com os resultados da loja dentro do ecossistema Remio: indicações recebidas, contatos gerados, taxa de conversão e avaliação, além do funil que acompanha a jornada da indicação até a venda estimada.'),
+  ...figura(10, '10-insights.png', 'Insights de IA',
+    'Tela que analisa as avaliações dos clientes usando a API da Claude (Anthropic). A inteligência artificial classifica o sentimento, calcula um índice de satisfação, identifica os temas recorrentes e gera pontos fortes, pontos de melhoria e sugestões para a plataforma — conectando o protótipo aos fluxos de IA descritos na arquitetura.'),
+  ...figura(11, '11-monitoramento.png', 'Monitoramento e observabilidade',
+    'Painel de observabilidade da plataforma: indicadores de saúde do sistema (disponibilidade, latência, taxa de erro), gráficos de latência e de requisições, verificação de saúde dos serviços (health checks), checagem de qualidade dos dados do ETL e o repositório de erros, que captura automaticamente as falhas de JavaScript do site.')
 ];
 
 /* ---------- documento ---------- */

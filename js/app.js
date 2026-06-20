@@ -709,6 +709,23 @@ function initInsights() {
     return avaliacoes;
   }
 
+  // Análise de exemplo — usada no modo demonstração (?demo na URL),
+  // que mostra o resultado sem precisar do backend rodando.
+  const ANALISE_EXEMPLO = {
+    sentimento_geral: 'positivo', indice_satisfacao: 88,
+    resumo: 'Os clientes elogiam fortemente a pontualidade e a qualidade do serviço, com algumas menções pontuais a preço e comunicação.',
+    temas: [
+      { tema: 'Pontualidade', mencoes: 7, sentimento: 'positivo' },
+      { tema: 'Qualidade do serviço', mencoes: 9, sentimento: 'positivo' },
+      { tema: 'Preço', mencoes: 3, sentimento: 'neutro' },
+      { tema: 'Comunicação prévia', mencoes: 2, sentimento: 'negativo' }
+    ],
+    pontos_fortes: ['Profissionais pontuais e educados', 'Serviço caprichado e detalhista', 'Bom custo-benefício percebido'],
+    pontos_de_melhoria: ['Melhorar a comunicação antes do atendimento', 'Padronizar a qualidade entre prestadores'],
+    sugestoes: ['Enviar lembrete automático 1h antes do serviço', 'Criar checklist de qualidade pós-serviço', 'Oferecer pacote recorrente com desconto']
+  };
+  const ehDemo = new URLSearchParams(location.search).has('demo');
+
   $('#botao-analisar').addEventListener('click', async () => {
     const avaliacoes = coletarAvaliacoes();
     if (!avaliacoes.length) { toast('Nenhuma avaliação para analisar nesta categoria.'); return; }
@@ -718,6 +735,14 @@ function initInsights() {
       <strong>Analisando ${avaliacoes.length} avaliações com a IA...</strong>
       A Claude está lendo os comentários e identificando padrões.</div>`;
     renderIcones();
+
+    // Modo demonstração: mostra um resultado de exemplo (sem backend)
+    if (ehDemo) {
+      setTimeout(() => renderAnalise(ANALISE_EXEMPLO, {
+        modelo: 'claude-opus-4-8', avaliacoes_analisadas: avaliacoes.length, tokens: { output_tokens: 412 }
+      }), 600);
+      return;
+    }
 
     try {
       const resp = await fetch(`${urlBackend()}/api/analisar`, {
@@ -741,6 +766,9 @@ function initInsights() {
       renderIcones();
     }
   });
+
+  // No modo demonstração, já dispara a análise de exemplo ao abrir a página
+  if (ehDemo) $('#botao-analisar').click();
 
   function renderAnalise(a, meta) {
     const cor = { positivo: 'var(--verde)', neutro: 'var(--ambar)', negativo: 'var(--vermelho)' }[a.sentimento_geral];
@@ -802,6 +830,10 @@ function initInsights() {
    de dados (ETL) e o repositório de erros (estes reais).
    ============================================================ */
 function initMonitoramento() {
+  // Modo demonstração: semeia um erro de exemplo se o repositório estiver vazio
+  if (new URLSearchParams(location.search).has('demo') && !localStorage.getItem('remio_erros')) {
+    registrarErro("Cannot read properties of undefined (reading 'nota')", 'perfil.html');
+  }
   const horas = Array.from({ length: 12 }, (_, i) => `${String((i * 2)).padStart(2, '0')}h`);
   const latencia = [165, 158, 150, 172, 180, 240, 210, 195, 205, 230, 188, 175];
   const requisicoes = [320, 210, 140, 180, 520, 880, 1020, 940, 870, 1100, 760, 540];
