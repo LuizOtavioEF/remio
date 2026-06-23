@@ -6,7 +6,7 @@ const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, ImageRun,
   AlignmentType, LevelFormat, HeadingLevel, BorderStyle, WidthType,
   ShadingType, PageBreak, PageNumber, Footer, ExternalHyperlink, VerticalAlign,
-  TabStopType, LeaderType
+  TabStopType, LeaderType, PageOrientation
 } = require('docx');
 
 const LARANJA = 'EA580C';
@@ -109,23 +109,28 @@ function tocItem(t, pg) {
     spacing: { after: 120, line: 276 }, children: [txt(t, { size: 22, color: GRAFITE }), txt('\t' + pg, { size: 22, color: GRAFITE })] });
 }
 
+/* Marcadores: indicam onde os diagramas detalhados (DER e estrela)
+   serão inseridos em páginas paisagem (mais largas, para legibilidade). */
+const MARCADOR_DER = '__DER__';
+const MARCADOR_ESTRELA = '__ESTRELA__';
+
 const corpo = [];
 corpo.push(p([txt('Sumário', { bold: true, size: 32, color: GRAFITE })], { after: 240 }));
 [
   ['1. Visão Geral da Arquitetura de Dados', '3'],
   ['2. Banco de Dados Transacional (OLTP)', '4'],
   ['     2.1. Modelo de Dados (DER)', '4'],
-  ['     2.2. Dicionário de Dados', '5'],
-  ['3. Data Warehouse (Modelo Dimensional)', '7'],
-  ['     3.1. Esquema Estrela', '7'],
-  ['     3.2. Dimensões', '7'],
-  ['     3.3. Tabelas de Fato', '8'],
-  ['4. Processo de ETL no Pentaho (PDI)', '9'],
-  ['     4.1. Job Principal de Carga', '9'],
-  ['     4.2. Anatomia de uma Transformation', '9'],
-  ['     4.3. Transformations e Estratégia de Carga', '10'],
-  ['5. Do Dado ao Indicador — Mapeamento para os Dashboards', '11'],
-  ['6. Evolução para Big Data', '12']
+  ['     2.2. Dicionário de Dados', '6'],
+  ['3. Data Warehouse (Modelo Dimensional)', '8'],
+  ['     3.1. Esquema Estrela', '8'],
+  ['     3.2. Dimensões', '10'],
+  ['     3.3. Tabelas de Fato', '10'],
+  ['4. Processo de ETL no Pentaho (PDI)', '11'],
+  ['     4.1. Job Principal de Carga', '11'],
+  ['     4.2. Anatomia de uma Transformation', '11'],
+  ['     4.3. Transformations e Estratégia de Carga', '12'],
+  ['5. Do Dado ao Indicador — Mapeamento para os Dashboards', '13'],
+  ['6. Evolução para Big Data', '14']
 ].forEach(([t, pg]) => corpo.push(tocItem(t, pg)));
 corpo.push(new Paragraph({ children: [new PageBreak()] }));
 
@@ -146,8 +151,8 @@ corpo.push(h1('2. Banco de Dados Transacional (OLTP)'));
 corpo.push(p('O banco transacional (sigla OLTP, de Online Transaction Processing) sustenta a operação da plataforma. Foi modelado de forma normalizada — sem redundância — em 11 tabelas que representam usuários, prestadores, parceiros, pedidos, orçamentos, pagamentos, avaliações e indicações.'));
 
 corpo.push(h2('2.1. Modelo de Dados (DER)'));
-corpo.push(p('O Diagrama Entidade-Relacionamento (DER) abaixo mostra as tabelas e seus relacionamentos. A entidade central é o pedido, que conecta o cliente, o prestador, a categoria e o endereço, e do qual derivam o orçamento, o pagamento e a avaliação.'));
-corpo.push(...figura('2-der-oltp.png', 624, 'Figura 2 — Diagrama Entidade-Relacionamento do banco transacional (OLTP).'));
+corpo.push(p('O Diagrama Entidade-Relacionamento (DER) — apresentado na página a seguir, em formato ampliado — mostra as tabelas e seus relacionamentos. A entidade central é o pedido, que conecta o cliente, o prestador, a categoria e o endereço, e do qual derivam o orçamento, o pagamento e a avaliação.'));
+corpo.push(MARCADOR_DER);
 corpo.push(p('A tabela a seguir resume a finalidade de cada entidade:', { before: 80 }));
 corpo.push(table(['Tabela', 'Finalidade'], [
   ['usuario', 'Conta base de qualquer perfil (cliente, prestador ou parceiro).'],
@@ -224,8 +229,8 @@ corpo.push(h1('3. Data Warehouse (Modelo Dimensional)'));
 corpo.push(p('O Data Warehouse (DW) é o ambiente analítico, modelado segundo a técnica dimensional de Ralph Kimball. Em vez de tabelas normalizadas, organiza-se em tabelas de dimensão (o contexto: quem, o quê, quando) e tabelas de fato (as métricas: quanto, quantos), formando um esquema estrela.'));
 
 corpo.push(h2('3.1. Esquema Estrela'));
-corpo.push(p('A Remio possui três tabelas de fato que compartilham dimensões comuns — uma configuração chamada constelação de fatos. As cinco dimensões (tempo, cliente, prestador, serviço e parceiro) são reaproveitadas pelos fatos, garantindo consistência analítica.'));
-corpo.push(...figura('3-estrela-dw.png', 624, 'Figura 3 — Esquema estrela do Data Warehouse (constelação de fatos).'));
+corpo.push(p('A Remio possui três tabelas de fato que compartilham dimensões comuns — uma configuração chamada constelação de fatos. As cinco dimensões (tempo, cliente, prestador, serviço e parceiro) são reaproveitadas pelos fatos, garantindo consistência analítica. O esquema é apresentado na página a seguir, em formato ampliado.'));
+corpo.push(MARCADOR_ESTRELA);
 corpo.push(p([txt('Convenção de chaves: ', { bold: true }), txt('cada dimensão tem uma chave substituta (surrogate key, prefixo sk_) gerada no próprio DW, além da chave natural (prefixo id_) herdada do OLTP. As chaves substitutas tornam as junções mais rápidas e permitem o versionamento histórico das dimensões.')], { before: 60 }));
 
 corpo.push(h2('3.2. Dimensões'));
@@ -329,6 +334,42 @@ corpo.push(bullet([txt('Processamento distribuído: ', { bold: true }), txt('tra
 corpo.push(bullet([txt('Analytics avançado: ', { bold: true }), txt('com a base histórica consolidada, tornam-se viáveis modelos preditivos — previsão de demanda por região, recomendação de prestadores e detecção de fraude no Pagamento Protegido.')]));
 corpo.push(p([txt('Em todos os cenários, o modelo dimensional documentado aqui permanece como a camada de consumo analítico — a fonte única e confiável que alimenta os dashboards e as decisões de negócio da plataforma.')], { before: 80 }));
 
+/* ---------- montagem das seções (retrato + paisagem) ----------
+   Os diagramas detalhados (DER e estrela) vão em páginas paisagem,
+   onde cabem maiores e ficam legíveis. */
+function dividir(arr, marcador) {
+  const i = arr.indexOf(marcador);
+  return [arr.slice(0, i), arr.slice(i + 1)];
+}
+const [seg1, restoA] = dividir(corpo, MARCADOR_DER);
+const [seg2, seg3] = dividir(restoA, MARCADOR_ESTRELA);
+
+const figDER = figura('2-der-oltp.png', 860, 'Figura 2 — Diagrama Entidade-Relacionamento do banco transacional (OLTP).');
+const figEstrela = figura('3-estrela-dw.png', 860, 'Figura 3 — Esquema estrela do Data Warehouse (constelação de fatos).');
+
+const rodape = () => new Footer({ children: [ new Paragraph({ alignment: AlignmentType.CENTER,
+  children: [txt('Remio — Engenharia de Dados  |  ', { size: 16, color: '9CA3AF' }),
+    txt('Página ', { size: 16, color: '9CA3AF' }),
+    new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '9CA3AF' })] }) ] });
+
+const margem = { top: 1440, right: 1440, bottom: 1440, left: 1440 };
+const secaoRetrato = (filhos) => ({
+  properties: { page: { size: { width: 12240, height: 15840 }, margin: margem } },
+  footers: { default: rodape() }, children: filhos
+});
+const secaoPaisagem = (filhos) => ({
+  properties: { page: { size: { width: 12240, height: 15840, orientation: PageOrientation.LANDSCAPE }, margin: margem } },
+  footers: { default: rodape() }, children: filhos
+});
+
+const secoes = [
+  secaoRetrato([...capa, ...seg1]),
+  secaoPaisagem(figDER),
+  secaoRetrato(seg2),
+  secaoPaisagem(figEstrela),
+  secaoRetrato(seg3)
+];
+
 /* ---------- documento ---------- */
 const doc = new Document({
   creator: 'Equipe Remio — TCC UNIFOR',
@@ -347,19 +388,12 @@ const doc = new Document({
   },
   numbering: { config: [ { reference: 'bullets', levels: [{ level: 0, format: LevelFormat.BULLET, text: '•',
     alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 540, hanging: 260 } } } }] } ] },
-  sections: [{
-    properties: { page: { size: { width: 12240, height: 15840 },
-      margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
-    footers: { default: new Footer({ children: [ new Paragraph({ alignment: AlignmentType.CENTER,
-      children: [txt('Remio — Engenharia de Dados  |  ', { size: 16, color: '9CA3AF' }),
-        txt('Página ', { size: 16, color: '9CA3AF' }),
-        new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '9CA3AF' })] }) ] }) },
-    children: [...capa, ...corpo]
-  }]
+  sections: secoes
 });
 
 Packer.toBuffer(doc).then(buf => {
-  const out = path.join(__dirname, '..', 'docs', 'Remio - Engenharia de Dados.docx');
+  const nome = process.env.OUT_NAME || 'Remio - Engenharia de Dados.docx';
+  const out = path.join(__dirname, '..', 'docs', nome);
   fs.writeFileSync(out, buf);
   console.log('OK:', out);
 });
