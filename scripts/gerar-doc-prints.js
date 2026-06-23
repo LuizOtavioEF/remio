@@ -3,37 +3,37 @@ const fs = require('fs');
 const path = require('path');
 const {
   Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType,
-  HeadingLevel, BorderStyle, PageBreak, PageNumber, Footer, ExternalHyperlink,
-  TableOfContents
+  HeadingLevel, BorderStyle, PageBreak, PageNumber, Header, ExternalHyperlink
 } = require('docx');
 
 const LARANJA = 'EA580C';
 const GRAFITE = '1F2937';
+const FONTE = 'Arial'; // fonte recomendada pela ABNT
 const PRINTS = path.join(__dirname, '..', 'prints');
 
 const txt = (text, opts = {}) => new TextRun({ text, ...opts });
 
-/* dimensões reais dos PNG e escala para caber na página (máx 624 x 760 px) */
+/* dimensões reais dos PNG e escala para caber na página A4 (máx 600 x 720 px),
+   deixando espaço para a legenda, a fonte e a descrição. */
 function dims(file) {
   const b = fs.readFileSync(path.join(PRINTS, file));
   const w = b.readUInt32BE(16), h = b.readUInt32BE(20);
-  const escala = Math.min(624 / w, 680 / h);
+  const escala = Math.min(600 / w, 720 / h);
   return { data: b, width: Math.round(w * escala), height: Math.round(h * escala) };
 }
 
-/* uma figura por página: legenda (heading) + imagem + descrição */
+/* Figura ABNT, uma por página: legenda "Figura N — Título" (fonte 10) acima,
+   imagem, "Fonte:" (fonte 10) abaixo e a descrição em seguida. */
 function figura(n, file, titulo, descricao, primeira = false) {
   const d = dims(file);
   const blocos = [];
   if (!primeira) blocos.push(new Paragraph({ children: [new PageBreak()] }));
   blocos.push(new Paragraph({
-    heading: HeadingLevel.HEADING_1,
-    children: [txt(`Figura ${n} — ${titulo}`)],
-    spacing: { before: 0, after: 160 }
+    alignment: AlignmentType.CENTER, spacing: { before: 0, after: 40 },
+    children: [txt(`Figura ${n} — ${titulo}`, { size: 20, color: GRAFITE })]
   }));
   blocos.push(new Paragraph({
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 120 },
+    alignment: AlignmentType.CENTER, spacing: { after: 40 },
     children: [new ImageRun({
       type: 'png', data: d.data,
       transformation: { width: d.width, height: d.height },
@@ -41,9 +41,12 @@ function figura(n, file, titulo, descricao, primeira = false) {
     })]
   }));
   blocos.push(new Paragraph({
-    alignment: AlignmentType.JUSTIFIED,
-    spacing: { after: 0, line: 276 },
-    children: [txt(descricao, { size: 20, color: '4B5563' })]
+    alignment: AlignmentType.CENTER, spacing: { after: 140 },
+    children: [txt('Fonte: elaborado pelos autores (2026).', { size: 20, color: GRAFITE })]
+  }));
+  blocos.push(new Paragraph({
+    alignment: AlignmentType.JUSTIFIED, spacing: { after: 0, line: 360 },
+    children: [txt(descricao, { size: 22, color: GRAFITE })]
   }));
   return blocos;
 }
@@ -76,11 +79,11 @@ const capa = [
 
 /* ---------- introdução ---------- */
 const intro = [
-  new Paragraph({ heading: HeadingLevel.HEADING_1, children: [txt('Apresentação')],
-    spacing: { after: 160 } }),
-  new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 276 },
+  new Paragraph({ heading: HeadingLevel.HEADING_1, children: [txt('APRESENTAÇÃO')],
+    spacing: { after: 200, line: 360 } }),
+  new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 360 }, indent: { firstLine: 709 },
     children: [txt('Este documento reúne as capturas de tela das principais páginas do protótipo da plataforma Remio, um marketplace que conecta clientes a prestadores de serviços domésticos. As imagens demonstram a interface desenvolvida, a identidade visual adotada (laranja como cor principal, transmitindo o universo de serviços e construção) e as funcionalidades implementadas, incluindo os três painéis de Business Intelligence (BI).')] }),
-  new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 276 },
+  new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 360 }, indent: { firstLine: 709 },
     children: [txt('As telas a seguir foram capturadas diretamente do site em funcionamento, demonstrando a jornada completa do usuário — da busca por profissionais até o pagamento protegido e a análise de indicadores.')] }),
   new Paragraph({ children: [new PageBreak()] })
 ];
@@ -116,22 +119,19 @@ const doc = new Document({
   creator: 'Equipe Remio — TCC UNIFOR',
   title: 'Prototipo do Site — Principais Telas — Remio',
   styles: {
-    default: { document: { run: { font: 'Arial', size: 22, color: GRAFITE } } },
+    default: { document: { run: { font: FONTE, size: 24, color: GRAFITE } } },
     paragraphStyles: [
       { id: 'Heading1', name: 'Heading 1', basedOn: 'Normal', next: 'Normal', quickFormat: true,
-        run: { size: 26, bold: true, font: 'Arial', color: LARANJA },
-        paragraph: { spacing: { before: 0, after: 160 }, outlineLevel: 0,
-          border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: LARANJA, space: 4 } } } }
+        run: { size: 28, bold: true, font: FONTE, color: LARANJA },
+        paragraph: { spacing: { before: 0, after: 200, line: 360 }, outlineLevel: 0 } }
     ]
   },
   sections: [{
-    properties: { page: { size: { width: 12240, height: 15840 },
-      margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
-    footers: { default: new Footer({ children: [ new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [txt('Remio — Protótipo do Site  |  ', { size: 16, color: '9CA3AF' }),
-        txt('Página ', { size: 16, color: '9CA3AF' }),
-        new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '9CA3AF' })] }) ] }) },
+    properties: { page: { size: { width: 11906, height: 16838 },
+      margin: { top: 1701, right: 1134, bottom: 1134, left: 1701 } } },
+    headers: { default: new Header({ children: [ new Paragraph({
+      alignment: AlignmentType.RIGHT,
+      children: [ new TextRun({ children: [PageNumber.CURRENT], size: 20, color: GRAFITE }) ] }) ] }) },
     children: [...capa, ...intro, ...figuras]
   }]
 });

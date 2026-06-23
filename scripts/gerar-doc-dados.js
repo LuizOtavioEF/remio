@@ -5,7 +5,7 @@ const path = require('path');
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, ImageRun,
   AlignmentType, LevelFormat, HeadingLevel, BorderStyle, WidthType,
-  ShadingType, PageBreak, PageNumber, Footer, ExternalHyperlink, VerticalAlign,
+  ShadingType, PageBreak, PageNumber, Footer, Header, ExternalHyperlink, VerticalAlign,
   TabStopType, LeaderType, PageOrientation
 } = require('docx');
 
@@ -13,24 +13,33 @@ const LARANJA = 'EA580C';
 const GRAFITE = '1F2937';
 const CINZA_BORDA = 'CCCCCC';
 const CINZA_CLARO = 'F3F4F6';
-const CONTENT_W = 9360;
+// ABNT (NBR 14724): A4, margens 3/3/2/2 cm. Largura útil = 11906 - 1701 - 1134.
+const CONTENT_W = 9071;
+const RECUO = 709;        // recuo de primeira linha 1,25 cm
+const FONTE = 'Arial';    // fonte recomendada pela ABNT
 const DIAG = path.join(__dirname, '..', 'diagramas');
 
 const b = { style: BorderStyle.SINGLE, size: 1, color: CINZA_BORDA };
 const cellBorders = { top: b, bottom: b, left: b, right: b };
 const txt = (t, o = {}) => new TextRun({ text: t, ...o });
 
+// Corpo do texto: justificado, espaçamento 1,5 e recuo de 1ª linha (ABNT),
+// exceto quando centralizado (capa, legendas).
 function p(children, opts = {}) {
+  const centrado = opts.align === AlignmentType.CENTER;
   return new Paragraph({
     children: Array.isArray(children) ? children : [txt(children, opts.run || {})],
-    spacing: { after: opts.after ?? 120, before: opts.before ?? 0, line: 276 },
-    alignment: opts.align
+    spacing: { after: opts.after ?? 120, before: opts.before ?? 0, line: 360 },
+    alignment: opts.align ?? AlignmentType.JUSTIFIED,
+    indent: (centrado || opts.semRecuo) ? undefined : { firstLine: RECUO }
   });
 }
-const h1 = t => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [txt(t)], spacing: { before: 320, after: 160 } });
-const h2 = t => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [txt(t)], spacing: { before: 240, after: 120 } });
+// Títulos ABNT (NBR 6024): número sem ponto final; seção primária em maiúsculas.
+const semPonto = t => t.replace(/^(\d+(?:\.\d+)*)\.\s+/, '$1 ');
+const h1 = t => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [txt(semPonto(t).toUpperCase())], spacing: { before: 320, after: 200, line: 360 } });
+const h2 = t => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [txt(semPonto(t))], spacing: { before: 240, after: 120, line: 360 } });
 const bullet = c => new Paragraph({ numbering: { reference: 'bullets', level: 0 },
-  children: Array.isArray(c) ? c : [txt(c)], spacing: { after: 80, line: 276 } });
+  children: Array.isArray(c) ? c : [txt(c)], spacing: { after: 80, line: 360 } });
 
 function code(lines) {
   return new Table({ width: { size: CONTENT_W, type: WidthType.DXA }, columnWidths: [CONTENT_W],
@@ -56,12 +65,15 @@ function bCell(t, w, fill, mono) {
     margins: { top: 60, bottom: 60, left: 110, right: 110 }, verticalAlign: VerticalAlign.CENTER,
     children: [new Paragraph({ children: [txt(String(t), { size: 18, font: mono ? 'Consolas' : 'Arial' })] })] });
 }
-/* table: headers[], rows[][], widths[], monoCols (set de índices monoespaçados) */
+/* table: headers[], rows[][], widths[], monoCols (set de índices monoespaçados).
+   As larguras são normalizadas para a largura útil ABNT (CONTENT_W). */
 function table(headers, rows, widths, monoCols = new Set()) {
-  const head = new TableRow({ tableHeader: true, children: headers.map((h, i) => hCell(h, widths[i])) });
+  const soma = widths.reduce((a, x) => a + x, 0);
+  const w = widths.map(x => Math.round(x * CONTENT_W / soma));
+  const head = new TableRow({ tableHeader: true, children: headers.map((h, i) => hCell(h, w[i])) });
   const body = rows.map((r, ri) => new TableRow({
-    children: r.map((c, i) => bCell(c, widths[i], ri % 2 ? CINZA_CLARO : undefined, monoCols.has(i))) }));
-  return new Table({ width: { size: CONTENT_W, type: WidthType.DXA }, columnWidths: widths, rows: [head, ...body] });
+    children: r.map((c, i) => bCell(c, w[i], ri % 2 ? CINZA_CLARO : undefined, monoCols.has(i))) }));
+  return new Table({ width: { size: CONTENT_W, type: WidthType.DXA }, columnWidths: w, rows: [head, ...body] });
 }
 
 function imgDims(file) {
@@ -69,17 +81,21 @@ function imgDims(file) {
   const w = buf.readUInt32BE(16), h = buf.readUInt32BE(20);
   return { buf, w, h };
 }
-/* imagem centralizada, escalada para largura alvo (px) */
-function figura(file, larguraAlvo, legenda) {
+/* Figura no padrão ABNT: legenda "Figura X — Título" acima (fonte 10) e
+   "Fonte:" abaixo (fonte 10); imagem centralizada. */
+function figura(file, larguraAlvo, legenda, fonte) {
   const d = imgDims(file);
   const escala = larguraAlvo / d.w;
-  const out = [ new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 80, after: 60 },
-    children: [new ImageRun({ type: 'png', data: d.buf,
-      transformation: { width: Math.round(d.w * escala), height: Math.round(d.h * escala) },
-      altText: { title: legenda, description: legenda, name: file } })] }) ];
-  out.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
-    children: [txt(legenda, { italics: true, size: 17, color: '6B7280' })] }));
-  return out;
+  return [
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 160, after: 40 },
+      children: [txt(legenda, { size: 20, color: GRAFITE })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 },
+      children: [new ImageRun({ type: 'png', data: d.buf,
+        transformation: { width: Math.round(d.w * escala), height: Math.round(d.h * escala) },
+        altText: { title: legenda, description: legenda, name: file } })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
+      children: [txt(fonte || 'Fonte: elaborado pelos autores (2026).', { size: 20, color: GRAFITE })] })
+  ];
 }
 
 /* dicionário: tabela de colunas (Coluna | Tipo | Descrição) */
@@ -105,8 +121,8 @@ const capa = [
 
 /* ---------- sumário estático ---------- */
 function tocItem(t, pg) {
-  return new Paragraph({ tabStops: [{ type: TabStopType.RIGHT, position: 9180, leader: LeaderType.DOT }],
-    spacing: { after: 120, line: 276 }, children: [txt(t, { size: 22, color: GRAFITE }), txt('\t' + pg, { size: 22, color: GRAFITE })] });
+  return new Paragraph({ tabStops: [{ type: TabStopType.RIGHT, position: CONTENT_W, leader: LeaderType.DOT }],
+    spacing: { after: 120, line: 360 }, children: [txt(t, { size: 24, color: GRAFITE }), txt('\t' + pg, { size: 24, color: GRAFITE })] });
 }
 
 /* Marcadores: indicam onde os diagramas detalhados (DER e estrela)
@@ -115,7 +131,7 @@ const MARCADOR_DER = '__DER__';
 const MARCADOR_ESTRELA = '__ESTRELA__';
 
 const corpo = [];
-corpo.push(p([txt('Sumário', { bold: true, size: 32, color: GRAFITE })], { after: 240 }));
+corpo.push(p([txt('SUMÁRIO', { bold: true, size: 24, color: GRAFITE })], { align: AlignmentType.CENTER, after: 360 }));
 [
   ['1. Visão Geral da Arquitetura de Dados', '3'],
   ['2. Banco de Dados Transacional (OLTP)', '4'],
@@ -131,7 +147,7 @@ corpo.push(p([txt('Sumário', { bold: true, size: 32, color: GRAFITE })], { afte
   ['     4.3. Transformations e Estratégia de Carga', '12'],
   ['5. Do Dado ao Indicador — Mapeamento para os Dashboards', '13'],
   ['6. Evolução para Big Data', '14']
-].forEach(([t, pg]) => corpo.push(tocItem(t, pg)));
+].forEach(([t, pg]) => corpo.push(tocItem(t.replace(/^(\s*\d+(?:\.\d+)*)\./, '$1'), pg)));
 corpo.push(new Paragraph({ children: [new PageBreak()] }));
 
 /* ---------- 1. Visão geral ---------- */
@@ -344,22 +360,23 @@ function dividir(arr, marcador) {
 const [seg1, restoA] = dividir(corpo, MARCADOR_DER);
 const [seg2, seg3] = dividir(restoA, MARCADOR_ESTRELA);
 
-const figDER = figura('2-der-oltp.png', 860, 'Figura 2 — Diagrama Entidade-Relacionamento do banco transacional (OLTP).');
-const figEstrela = figura('3-estrela-dw.png', 860, 'Figura 3 — Esquema estrela do Data Warehouse (constelação de fatos).');
+// Largura ajustada para caber (com legenda e fonte) na altura útil da página paisagem.
+const figDER = figura('2-der-oltp.png', 770, 'Figura 2 — Diagrama Entidade-Relacionamento do banco transacional (OLTP).');
+const figEstrela = figura('3-estrela-dw.png', 900, 'Figura 3 — Esquema estrela do Data Warehouse (constelação de fatos).');
 
-const rodape = () => new Footer({ children: [ new Paragraph({ alignment: AlignmentType.CENTER,
-  children: [txt('Remio — Engenharia de Dados  |  ', { size: 16, color: '9CA3AF' }),
-    txt('Página ', { size: 16, color: '9CA3AF' }),
-    new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '9CA3AF' })] }) ] });
+// Numeração no canto superior direito (ABNT NBR 14724), fonte 10.
+const cabecalho = () => new Header({ children: [ new Paragraph({ alignment: AlignmentType.RIGHT,
+  children: [ new TextRun({ children: [PageNumber.CURRENT], size: 20, color: GRAFITE }) ] }) ] });
 
-const margem = { top: 1440, right: 1440, bottom: 1440, left: 1440 };
+// A4 com margens ABNT: 3 cm (esquerda/superior), 2 cm (direita/inferior).
+const margem = { top: 1701, right: 1134, bottom: 1134, left: 1701 };
 const secaoRetrato = (filhos) => ({
-  properties: { page: { size: { width: 12240, height: 15840 }, margin: margem } },
-  footers: { default: rodape() }, children: filhos
+  properties: { page: { size: { width: 11906, height: 16838 }, margin: margem } },
+  headers: { default: cabecalho() }, children: filhos
 });
 const secaoPaisagem = (filhos) => ({
-  properties: { page: { size: { width: 12240, height: 15840, orientation: PageOrientation.LANDSCAPE }, margin: margem } },
-  footers: { default: rodape() }, children: filhos
+  properties: { page: { size: { width: 11906, height: 16838, orientation: PageOrientation.LANDSCAPE }, margin: margem } },
+  headers: { default: cabecalho() }, children: filhos
 });
 
 const secoes = [
@@ -375,15 +392,14 @@ const doc = new Document({
   creator: 'Equipe Remio — TCC UNIFOR',
   title: 'Engenharia de Dados — Remio',
   styles: {
-    default: { document: { run: { font: 'Arial', size: 22, color: GRAFITE } } },
+    default: { document: { run: { font: FONTE, size: 24, color: GRAFITE } } },
     paragraphStyles: [
       { id: 'Heading1', name: 'Heading 1', basedOn: 'Normal', next: 'Normal', quickFormat: true,
-        run: { size: 30, bold: true, font: 'Arial', color: LARANJA },
-        paragraph: { spacing: { before: 320, after: 160 }, outlineLevel: 0,
-          border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: LARANJA, space: 4 } } } },
+        run: { size: 28, bold: true, font: FONTE, color: LARANJA },
+        paragraph: { spacing: { before: 320, after: 200, line: 360 }, outlineLevel: 0 } },
       { id: 'Heading2', name: 'Heading 2', basedOn: 'Normal', next: 'Normal', quickFormat: true,
-        run: { size: 25, bold: true, font: 'Arial', color: GRAFITE },
-        paragraph: { spacing: { before: 220, after: 100 }, outlineLevel: 1 } }
+        run: { size: 24, bold: true, font: FONTE, color: LARANJA },
+        paragraph: { spacing: { before: 240, after: 120, line: 360 }, outlineLevel: 1 } }
     ]
   },
   numbering: { config: [ { reference: 'bullets', levels: [{ level: 0, format: LevelFormat.BULLET, text: '•',

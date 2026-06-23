@@ -14,7 +14,11 @@ const CINZA_BORDA = 'CCCCCC';
 const CINZA_CLARO = 'F3F4F6';
 const LARANJA_CLARO = 'FFEDD5';
 
-const CONTENT_W = 9360; // US Letter, margens de 1"
+// ABNT (NBR 14724): A4, margens 3/3/2/2 cm. Largura útil = 11906 - 1701 - 1134.
+const CONTENT_W = 9071;
+const RECUO = 709;     // recuo de primeira linha 1,25 cm
+const FONTE = 'Arial'; // fonte recomendada pela ABNT
+const semPonto = t => t.replace(/^(\d+(?:\.\d+)*)\.\s+/, '$1 '); // número de seção sem ponto final
 
 /* ---------- helpers ---------- */
 const b = { style: BorderStyle.SINGLE, size: 1, color: CINZA_BORDA };
@@ -23,26 +27,29 @@ const cellBorders = { top: b, bottom: b, left: b, right: b };
 function txt(text, opts = {}) { return new TextRun({ text, ...opts }); }
 
 function p(text, opts = {}) {
+  const centrado = opts.align === AlignmentType.CENTER;
   return new Paragraph({
     children: Array.isArray(text) ? text : [txt(text, opts.run || {})],
-    spacing: { after: opts.after ?? 120, before: opts.before ?? 0, line: 276 },
-    alignment: opts.align,
+    spacing: { after: opts.after ?? 120, before: opts.before ?? 0, line: 360 },
+    alignment: opts.align ?? AlignmentType.JUSTIFIED,
+    indent: (centrado || opts.semRecuo) ? undefined : { firstLine: RECUO },
     ...opts.paragraph
   });
 }
 
 function h1(text) {
-  return new Paragraph({ heading: HeadingLevel.HEADING_1, children: [txt(text)],
-    spacing: { before: 320, after: 160 } });
+  // Seção primária ABNT: começa em nova página.
+  return new Paragraph({ heading: HeadingLevel.HEADING_1, children: [txt(semPonto(text).toUpperCase())],
+    pageBreakBefore: true, spacing: { before: 0, after: 200, line: 360 } });
 }
 function h2(text) {
-  return new Paragraph({ heading: HeadingLevel.HEADING_2, children: [txt(text)],
-    spacing: { before: 240, after: 120 } });
+  return new Paragraph({ heading: HeadingLevel.HEADING_2, children: [txt(semPonto(text))],
+    spacing: { before: 240, after: 120, line: 360 } });
 }
 
 function bullet(text) {
   return new Paragraph({ numbering: { reference: 'bullets', level: 0 },
-    children: Array.isArray(text) ? text : [txt(text)], spacing: { after: 80, line: 276 } });
+    children: Array.isArray(text) ? text : [txt(text)], spacing: { after: 80, line: 360 } });
 }
 
 function code(lines) {
@@ -85,17 +92,19 @@ function bodyCell(children, w, fill) {
 }
 
 function table(headers, rows, widths) {
+  const soma = widths.reduce((a, x) => a + x, 0);
+  const w = widths.map(x => Math.round(x * CONTENT_W / soma)); // normaliza p/ largura útil ABNT
   const headerRow = new TableRow({ tableHeader: true,
-    children: headers.map((hd, i) => headerCell(hd, widths[i])) });
+    children: headers.map((hd, i) => headerCell(hd, w[i])) });
   const bodyRows = rows.map((r, ri) => new TableRow({
     children: r.map((c, i) => {
       const fill = ri % 2 === 1 ? CINZA_CLARO : undefined;
-      if (Array.isArray(c)) return bodyCell(c, widths[i], fill); // já são parágrafos
-      return bodyCell([new Paragraph({ children: [txt(String(c), { size: 20 })] })], widths[i], fill);
+      if (Array.isArray(c)) return bodyCell(c, w[i], fill); // já são parágrafos
+      return bodyCell([new Paragraph({ children: [txt(String(c), { size: 20 })] })], w[i], fill);
     })
   }));
   return new Table({ width: { size: CONTENT_W, type: WidthType.DXA },
-    columnWidths: widths, rows: [headerRow, ...bodyRows] });
+    columnWidths: w, rows: [headerRow, ...bodyRows] });
 }
 
 function legenda(text) {
@@ -140,32 +149,31 @@ function capa() {
 /* ---------- corpo ---------- */
 const corpo = [];
 
-corpo.push(new Paragraph({ children: [txt('Sumário', { bold: true, size: 32, color: GRAFITE })],
-  spacing: { after: 240 } }));
+corpo.push(new Paragraph({ children: [txt('SUMÁRIO', { bold: true, size: 24, color: GRAFITE })],
+  alignment: AlignmentType.CENTER, spacing: { after: 360 } }));
 
 function tocItem(titulo, pagina) {
   return new Paragraph({
-    tabStops: [{ type: TabStopType.RIGHT, position: 9180, leader: LeaderType.DOT }],
-    spacing: { after: 120, line: 276 },
-    children: [ txt(titulo, { size: 22, color: GRAFITE }), txt('\t' + pagina, { size: 22, color: GRAFITE }) ]
+    tabStops: [{ type: TabStopType.RIGHT, position: CONTENT_W, leader: LeaderType.DOT }],
+    spacing: { after: 120, line: 360 },
+    children: [ txt(titulo.replace(/^(\s*\d+(?:\.\d+)*)\./, '$1'), { size: 24, color: GRAFITE }), txt('\t' + pagina, { size: 24, color: GRAFITE }) ]
   });
 }
 
 [
   ['1. Visão Geral do Repositório', '3'],
-  ['2. Tecnologias Utilizadas', '3'],
-  ['3. Estrutura de Arquivos', '4'],
-  ['4. Descrição dos Arquivos', '4'],
-  ['5. Arquitetura e Funcionamento', '5'],
-  ['6. Funcionalidades-Chave e Localização no Código', '5'],
-  ['7. Modelo de Dados Simulado', '6'],
-  ['8. Painéis de Business Intelligence (BI)', '7'],
-  ['9. Como Executar o Projeto', '7'],
-  ['10. Versionamento e Publicação', '7'],
-  ['11. Limitações e Evolução para um Sistema Real', '8']
+  ['2. Tecnologias Utilizadas', '4'],
+  ['3. Estrutura de Arquivos', '5'],
+  ['4. Descrição dos Arquivos', '6'],
+  ['5. Arquitetura e Funcionamento', '8'],
+  ['6. Funcionalidades-Chave e Localização no Código', '9'],
+  ['7. Modelo de Dados Simulado', '10'],
+  ['8. Painéis de Business Intelligence (BI)', '11'],
+  ['9. Como Executar o Projeto', '12'],
+  ['10. Versionamento e Publicação', '13'],
+  ['11. Limitações e Evolução para um Sistema Real', '14']
 ].forEach(([t, pg]) => corpo.push(tocItem(t, pg)));
-
-corpo.push(new Paragraph({ children: [new PageBreak()] }));
+// (a quebra para a 1ª seção vem do pageBreakBefore do h1)
 
 // 1. Visão geral
 corpo.push(h1('1. Visão Geral do Repositório'));
@@ -358,15 +366,14 @@ const doc = new Document({
   creator: 'Equipe Remio — TCC UNIFOR',
   title: 'Documentação do Repositório de Código — Remio',
   styles: {
-    default: { document: { run: { font: 'Arial', size: 22, color: GRAFITE } } },
+    default: { document: { run: { font: FONTE, size: 24, color: GRAFITE } } },
     paragraphStyles: [
       { id: 'Heading1', name: 'Heading 1', basedOn: 'Normal', next: 'Normal', quickFormat: true,
-        run: { size: 30, bold: true, font: 'Arial', color: LARANJA },
-        paragraph: { spacing: { before: 320, after: 160 }, outlineLevel: 0,
-          border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: LARANJA, space: 4 } } } },
+        run: { size: 28, bold: true, font: FONTE, color: LARANJA },
+        paragraph: { spacing: { before: 320, after: 200, line: 360 }, outlineLevel: 0 } },
       { id: 'Heading2', name: 'Heading 2', basedOn: 'Normal', next: 'Normal', quickFormat: true,
-        run: { size: 25, bold: true, font: 'Arial', color: GRAFITE },
-        paragraph: { spacing: { before: 220, after: 100 }, outlineLevel: 1 } }
+        run: { size: 24, bold: true, font: FONTE, color: LARANJA },
+        paragraph: { spacing: { before: 240, after: 120, line: 360 }, outlineLevel: 1 } }
     ]
   },
   numbering: { config: [
@@ -374,13 +381,11 @@ const doc = new Document({
       alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 540, hanging: 260 } } } }] }
   ] },
   sections: [{
-    properties: { page: { size: { width: 12240, height: 15840 },
-      margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
-    footers: { default: new Footer({ children: [ new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [txt('Remio — Documentação do Repositório de Código  |  ', { size: 16, color: '9CA3AF' }),
-        txt('Página ', { size: 16, color: '9CA3AF' }),
-        new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '9CA3AF' })] }) ] }) },
+    properties: { page: { size: { width: 11906, height: 16838 },
+      margin: { top: 1701, right: 1134, bottom: 1134, left: 1701 } } },
+    headers: { default: new Header({ children: [ new Paragraph({
+      alignment: AlignmentType.RIGHT,
+      children: [ new TextRun({ children: [PageNumber.CURRENT], size: 20, color: GRAFITE }) ] }) ] }) },
     children: [...capa(), ...corpo]
   }]
 });
